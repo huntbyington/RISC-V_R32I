@@ -1,3 +1,4 @@
 *.vcd
 *_sim
+*_sim.exe
 out/*
