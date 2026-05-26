@@ -1,61 +1,55 @@
 # ==============================================================================
-# RISC-V CPU Development Makefile (Module-Specific)
+# RISC-V CPU Development Makefile (True Windows Native)
 # ==============================================================================
 
-# Compiler and simulator engines
 VC = iverilog
 VVP = vvp
 FLAGS = -g2012
 
-# Directories
 SRC_DIR = src
 SIM_DIR = sim
+OUT_DIR = sim/out
 
-# ==============================================================================
-# MODULE DEFINITIONS
-# ==============================================================================
-# As you create new modules, define their source and testbench files here.
-
-# Arithmetic Logic Unit (ALU)
+# Module Definitions
 ALU_SRC = $(SRC_DIR)/alu.sv
 ALU_TB  = $(SIM_DIR)/alu_tb.sv
-ALU_OUT = alu_sim
-ALU_VCD = sim/alu_waves.vcd
+ALU_OUT = $(OUT_DIR)/alu_sim.exe
+ALU_VCD = $(OUT_DIR)/alu_waves.vcd
 
-# Example placeholder for your next module (ImmGen)
-# IMM_SRC = $(SRC_DIR)/imm_gen.sv
-# IMM_TB  = $(SIM_DIR)/imm_gen_tb.sv
-# IMM_OUT = imm_sim
+SEU_SRC = $(SRC_DIR)/sign_extension.sv
+SEU_TB  = $(SIM_DIR)/sign_extension_tb.sv
+SEU_OUT = $(OUT_DIR)/sign_ext_sim.exe
+SEU_VCD = $(OUT_DIR)/sign_ext_waves.vcd
 
-# ==============================================================================
-# TARGET RULES
-# ==============================================================================
-
-# Default target if you just type 'make'
-all: alu
+all: alu seu
 
 # --- ALU Targets ---
-# Typing 'make alu' will compile and run the automated ALU testbench
 alu: $(ALU_SRC) $(ALU_TB)
-	@echo "--------------------------------------------------"
-	@echo "Compiling and Running ALU Testbench..."
-	@echo "--------------------------------------------------"
+	@echo --------------------------------------------------
+	@echo Compiling and Running ALU Testbench...
+	@echo --------------------------------------------------
+	@if not exist "sim\out" mkdir "sim\out"
 	$(VC) $(FLAGS) -o $(ALU_OUT) $(ALU_SRC) $(ALU_TB)
 	$(VVP) $(ALU_OUT)
 
-# Typing 'make alu-waves' will run the tests and launch GTKWave
 alu-waves: alu
-	@echo "Opening ALU visual waveform viewer..."
 	gtkwave $(ALU_VCD) &
 
+# --- SEU Targets ---
+seu: $(SEU_SRC) $(SEU_TB)
+	@echo --------------------------------------------------
+	@echo Compiling and Running Sign Extension Testbench...
+	@echo --------------------------------------------------
+	@if not exist "sim\out" mkdir "sim\out"
+	$(VC) $(FLAGS) -o $(SEU_OUT) $(SEU_SRC) $(SEU_TB)
+	$(VVP) $(SEU_OUT)
 
-# --- UTILITY TARGETS ---
+seu-waves: seu
+	gtkwave $(SEU_VCD) &
 
-# Clean up all compiled simulation binaries and wave logs
 clean:
-	@echo "Cleaning up project directory..."
-	rm -f *_sim
-	rm -f sim/*.vcd
-	rm -f *.vcd
+	@echo Cleaning up project directory...
+	@if exist "sim\out" rmdir /s /q "sim\out"
+	@del /f /q *.vvp *_sim *_sim.exe *.vcd 2>nul || exit 0
 
-.PHONY: all alu alu-waves clean
+.PHONY: all alu alu-waves seu seu-waves clean
