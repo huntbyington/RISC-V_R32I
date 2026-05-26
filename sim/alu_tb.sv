@@ -28,7 +28,7 @@ module alu_tb;
     localparam [5:0] OP_ALU_SRA    = 6'b101011; // Shift Right Arithmetic
 
     initial begin
-        $dumpfile("alu_waves.vcd");
+        $dumpfile("sim/out/alu_waves.vcd");
         $dumpvars(0, alu_tb);
 
         $display("==================================================");

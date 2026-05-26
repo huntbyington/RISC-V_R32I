@@ -19,7 +19,7 @@ module alu #(parameter DATA_WIDTH = 32) (
     output reg [DATA_WIDTH-1:0] o_c
 );
 
-    always_comb begin
+    always @(*) begin
         case (i_alu_op)
             `OP_ALU_ADD:  o_c = i_a + i_b;
             `OP_ALU_SUB:  o_c = i_a - i_b;
