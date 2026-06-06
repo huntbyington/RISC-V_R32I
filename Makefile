@@ -29,7 +29,13 @@ REG_TB  = $(SIM_DIR)/reg_file_tb.sv
 REG_OUT = $(OUT_DIR)/reg_file_sim.exe
 REG_VCD = $(OUT_DIR)/reg_file_waves.vcd
 
-all: alu seu reg
+# Data Memory (DM)
+DM_SRC = $(SRC_DIR)/data_memory.sv
+DM_TB  = $(SIM_DIR)/data_memory_tb.sv
+DM_OUT = $(OUT_DIR)/data_mem_sim.exe
+DM_VCD = $(OUT_DIR)/data_mem_waves.vcd
+
+all: alu seu reg dm
 
 # --- ALU Targets ---
 alu: $(ALU_SRC) $(ALU_TB)
@@ -67,9 +73,24 @@ reg: $(REG_SRC) $(REG_TB)
 reg-waves: reg
 	gtkwave $(REG_VCD) &
 
+# --- Data Memory Targets ---
+dm: $(DM_SRC) $(DM_TB)
+	@echo --------------------------------------------------
+	@echo Compiling and Running Data Memory Testbench...
+	@echo --------------------------------------------------
+	@if not exist "sim\out" mkdir "sim\out"
+	$(VC) $(FLAGS) -o $(DM_OUT) $(DM_SRC) $(DM_TB)
+	$(VVP) $(DM_OUT)
+
+dm-waves: dm
+	gtkwave $(DM_VCD) &
+
+	$(VC) $(FLAGS) -o $(REG_OUT) $(REG_SRC) $(REG_TB)
+	$(VVP) $(REG_OUT)
+
 clean:
 	@echo Cleaning up project directory...
 	@if exist "sim\out" rmdir /s /q "sim\out"
 	@del /f /q *.vvp *_sim *_sim.exe *.vcd 2>nul || exit 0
 
-.PHONY: all alu alu-waves seu seu-waves reg reg-waves clean
+.PHONY: all alu alu-waves seu seu-waves reg reg-waves dm dm-waves clean
