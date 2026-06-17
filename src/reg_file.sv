@@ -1,17 +1,17 @@
-`define NUM_REGISTER 32
+`include "src/definitions.vh"
 
-module register_file #(parameter DATA_WIDTH = 32) (
+module register_file (
 	// INPUT
     input wire i_clk,
     input wire i_rst,
     input wire i_we,
-	input wire [DATA_WIDTH-1:0] i_rd,
+	input wire [`DATA_WIDTH-1:0] i_rd,
     input wire [$clog2(`NUM_REGISTER)-1:0] i_rd_addr,
     input wire [$clog2(`NUM_REGISTER)-1:0] i_rs1_addr,     
     input wire [$clog2(`NUM_REGISTER)-1:0] i_rs2_addr,
 	// OUTPUT
-    output wire [DATA_WIDTH-1:0] o_rs1,     
-    output wire [DATA_WIDTH-1:0] o_rs2
+    output wire [`DATA_WIDTH-1:0] o_rs1,     
+    output wire [`DATA_WIDTH-1:0] o_rs2
 );
 
     // Register file: 32 registers, each 32 bits wide

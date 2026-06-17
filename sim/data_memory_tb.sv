@@ -1,22 +1,18 @@
 `timescale 1ns/1ps
+`include "src/definitions.vh"
 
 module data_memory_tb;
 
-    localparam MEM_SIZE = 1024;
-    localparam DATA_WIDTH = 32;
-
     logic                    i_clk;
     logic                    i_we;
-    logic [DATA_WIDTH-1:0]   i_data;
+    logic [`DATA_WIDTH-1:0]   i_data;
     logic [9:0]              i_addr; // $clog2(1024) = 10 bits
-    logic [DATA_WIDTH-1:0]   o_data;
+    logic [`DATA_WIDTH-1:0]   o_data;
 
     integer error_count = 0;
 
     // Instantiate the Device Under Test (DUT)
-    data_memory #(
-        .MEM_SIZE(MEM_SIZE)
-    ) DUT (
+    data_memory DUT (
         .i_clk(i_clk),
         .i_we(i_we),
         .i_data(i_data),
