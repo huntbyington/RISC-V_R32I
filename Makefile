@@ -35,7 +35,13 @@ DM_TB  = $(SIM_DIR)/data_memory_tb.sv
 DM_OUT = $(OUT_DIR)/data_mem_sim.exe
 DM_VCD = $(OUT_DIR)/data_mem_waves.vcd
 
-all: alu seu reg dm
+# Decoder (DECODER)
+DECODER_SRC = $(SRC_DIR)/decoder.sv
+DECODER_TB  = $(SIM_DIR)/decoder_tb.sv
+DECODER_OUT = $(OUT_DIR)/decoder_sim.exe
+DECODER_VCD = $(OUT_DIR)/decoder_waves.vcd
+
+all: alu seu reg dm decoder
 
 # --- ALU Targets ---
 alu: $(ALU_SRC) $(ALU_TB)
@@ -85,12 +91,21 @@ dm: $(DM_SRC) $(DM_TB)
 dm-waves: dm
 	gtkwave $(DM_VCD) &
 
-	$(VC) $(FLAGS) -o $(REG_OUT) $(REG_SRC) $(REG_TB)
-	$(VVP) $(REG_OUT)
+# --- Decoder Targets ---
+decoder: $(DECODER_SRC) $(DECODER_TB)
+	@echo --------------------------------------------------
+	@echo Compiling and Running Decoder Testbench...
+	@echo --------------------------------------------------
+	@if not exist "sim\out" mkdir "sim\out"
+	$(VC) $(FLAGS) -o $(DECODER_OUT) $(DECODER_SRC) $(DECODER_TB)
+	$(VVP) $(DECODER_OUT)
+
+decoder-waves: decoder
+	gtkwave $(DECODER_VCD) &
 
 clean:
 	@echo Cleaning up project directory...
 	@if exist "sim\out" rmdir /s /q "sim\out"
 	@del /f /q *.vvp *_sim *_sim.exe *.vcd 2>nul || exit 0
 
-.PHONY: all alu alu-waves seu seu-waves reg reg-waves dm dm-waves clean
+.PHONY: all alu alu-waves seu seu-waves reg reg-waves dm dm-waves decoder decoder-waves clean
