@@ -41,7 +41,13 @@ DECODER_TB  = $(SIM_DIR)/decoder_tb.sv
 DECODER_OUT = $(OUT_DIR)/decoder_sim.exe
 DECODER_VCD = $(OUT_DIR)/decoder_waves.vcd
 
-all: alu seu reg dm decoder
+# Branch Unit (BRANCH)
+BRANCH_SRC = $(SRC_DIR)/branch_unit.sv
+BRANCH_TB  = $(SIM_DIR)/branch_unit_tb.sv
+BRANCH_OUT = $(OUT_DIR)/branch_unit_sim.exe
+BRANCH_VCD = $(OUT_DIR)/branch_unit_waves.vcd
+
+all: alu seu reg dm decoder branch
 
 # --- ALU Targets ---
 alu: $(ALU_SRC) $(ALU_TB)
@@ -103,9 +109,21 @@ decoder: $(DECODER_SRC) $(DECODER_TB)
 decoder-waves: decoder
 	gtkwave $(DECODER_VCD) &
 
+# --- Branch Unit Targets ---
+branch: $(BRANCH_SRC) $(BRANCH_TB)
+	@echo --------------------------------------------------
+	@echo Compiling and Running Branch Unit Testbench...
+	@echo --------------------------------------------------
+	@if not exist "sim\out" mkdir "sim\out"
+	$(VC) $(FLAGS) -o $(BRANCH_OUT) $(BRANCH_SRC) $(BRANCH_TB)
+	$(VVP) $(BRANCH_OUT)
+
+branch-waves: branch
+	gtkwave $(BRANCH_VCD) &
+
 clean:
 	@echo Cleaning up project directory...
 	@if exist "sim\out" rmdir /s /q "sim\out"
 	@del /f /q *.vvp *_sim *_sim.exe *.vcd 2>nul || exit 0
 
-.PHONY: all alu alu-waves seu seu-waves reg reg-waves dm dm-waves decoder decoder-waves clean
+.PHONY: all alu alu-waves seu seu-waves reg reg-waves dm dm-waves decoder decoder-waves branch branch-waves clean
