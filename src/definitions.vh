@@ -4,7 +4,8 @@
 // Global System Core Configuration Parameters
 `define INST_WIDTH      32  // Fixed bit-width for RISC-V instructions
 `define DATA_WIDTH      32  // Standard 32-bit architectural datapath width
-`define MEM_SIZE        1024 // Size of Data Memory in bytes (256 words)
+`define DATA_MEM_SIZE   1024 // Size of Data Memory in bytes (256 words)
+`define INST_MEM_SIZE   1024 // Size of Instruction Memory in bytes (256 words)
 `define NUM_REGISTER    32  // Number of elements in the physical Register File
 `define OPCODE          7   // Dedicated width of the hardware base opcode field
 
