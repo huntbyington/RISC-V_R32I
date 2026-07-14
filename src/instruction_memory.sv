@@ -15,5 +15,5 @@ module instruction_memory (
     always_ff @(posedge clk) begin
         inst <= memory[addr[$clog2(`INST_MEM_SIZE)-1:2]]; // Shift right by 2 bits for word addressing
     end
-  
+
 endmodule

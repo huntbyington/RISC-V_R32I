@@ -22,7 +22,6 @@
 `define OP_ALU_SRA    6'b101011 // Shift Right Arithmetic
 
 // RISC-V Base Instruction Set Opcodes
-`define OPCODE 7
 `define OP_LUI     7'b0110111 // Load Upper Immediate - U-Type
 `define OP_AUIPC   7'b0010111 // Add Upper Immediate to PC - U-Type
 `define OP_JAL     7'b1101111 // Jump and Link - J-Type 
