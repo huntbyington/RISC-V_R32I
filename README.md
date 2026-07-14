@@ -9,7 +9,6 @@ Implementation of a 32-bit RISC-V Base Integer Instruction Set (RV32I) CPU desig
 * **docs/** - Contains documentation assets, including the architecture diagrams.
 * **src/** - Contains all the SystemVerilog (.sv) source files for the CPU core (e.g., ALU, Control Unit, Register File, Program Counter).
 * **sim/** - Testbenches, verification environments, and simulation scripts to validate processor functionality.
-* **build/** - Output directory for compilation, synthesis, or simulation artifacts.
 * **Makefile** - Automation script for running simulations, compiling code, and cleaning up the workspace.
 * **LICENSE** - The project's licensing terms.
 
