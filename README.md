@@ -65,6 +65,15 @@ make clean
 
 ---
 
+## Current Work & Future Changes
+
+Active development is underway to expand the verification suite beyond basic unit tests:
+
+* **Docker-Based Testing Framework:** Implementing a containerized testing environment to ensure clean, reproducible build and simulation states across different machines.
+* **Official Architectural Compliance:** Integrating the official [RISC-V Architectural Tests (act4 branch)](https://github.com/riscv/riscv-arch-test/tree/act4) to rigorously validate the processor's compatibility with the RV32I ISA specification.
+
+---
+
 ## References & Resources
 
 This implementation was built using the following specifications and reference materials:
