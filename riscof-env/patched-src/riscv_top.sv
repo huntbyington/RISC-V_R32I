@@ -75,9 +75,13 @@ module riscv_top (
     // ==============================================================================
 
     // Instruction Memory Internal ROM Block
+    // NOTE (fix): .clk(i_clk) was previously left unconnected. instruction_memory
+    // is a synchronous (posedge-clocked) read, so with clk floating it never
+    // latched and `inst` stayed X forever. Also widened the address slice from
+    // pc[9:0] to pc[$clog2(`INST_MEM_SIZE)-1:0] to match the larger memory.
     instruction_memory u_instruction_memory (
         .clk(i_clk),
-        .addr(pc[9:0]),
+        .addr(pc[$clog2(`INST_MEM_SIZE)-1:0]),
         .inst(inst)
     );
 
@@ -140,11 +144,12 @@ module riscv_top (
     );
 
     // Synchronous Data Memory RAM Block
+    // NOTE: address slice widened from alu_result[9:0] to match DATA_MEM_SIZE.
     data_memory u_data_memory (
         .i_clk(i_clk),
         .i_we(o_mem_write),
         .i_data(reg_rd_data2),
-        .i_addr(alu_result[9:0]),
+        .i_addr(alu_result[$clog2(`DATA_MEM_SIZE)-1:0]),
         .o_data(mem_o_data)
     );
 

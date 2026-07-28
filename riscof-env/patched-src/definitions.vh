@@ -4,8 +4,19 @@
 // Global System Core Configuration Parameters
 `define INST_WIDTH      32  // Fixed bit-width for RISC-V instructions
 `define DATA_WIDTH      32  // Standard 32-bit architectural datapath width
-`define DATA_MEM_SIZE   16384 // Size of Data Memory in bytes (256 words)
-`define INST_MEM_SIZE   16384 // Size of Instruction Memory in bytes (256 words)
+
+// --------------------------------------------------------------------------
+// NOTE: bumped from 1024 -> 16384 bytes (256 -> 4096 words) each.
+// The original 1KB memories are too small to hold most riscv-arch-test
+// rv32i_m/I test binaries (test code + signature/data tables routinely
+// exceed 1KB). 16KB gives comfortable headroom; raise further if you see
+// "region `IMEM'/`DMEM' overflowed" errors from the linker.
+// If you change these, DATA_MEM_SIZE/INST_MEM_SIZE here must stay a power
+// of two and must match the MEMORY region LENGTHs in dut/env/link.ld.
+// --------------------------------------------------------------------------
+`define DATA_MEM_SIZE   16384 // Size of Data Memory in bytes
+`define INST_MEM_SIZE   16384 // Size of Instruction Memory in bytes
+
 `define NUM_REGISTER    32  // Number of elements in the physical Register File
 `define OPCODE          7   // Dedicated width of the hardware base opcode field
 
