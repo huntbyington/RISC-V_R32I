@@ -123,7 +123,7 @@ module riscv_top (
     assign alu_operand_b = o_alu_src_b ?  reg_rd_data2 : imm;
 
     // Central Execution ALU Unit
-    alu_unit u_alu_unit (
+    alu u_alu_unit (
         .i_a(alu_operand_a),
         .i_b(alu_operand_b),
         .i_alu_op(o_alu_op),
