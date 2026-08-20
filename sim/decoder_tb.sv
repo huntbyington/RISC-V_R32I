@@ -47,7 +47,7 @@ module decoder_tb;
         $display("STARTING AUTOMATED DECODER VERIFICATION");
         $display("==================================================");
 
-        // ------------------------------------------------
+// ------------------------------------------------
         // TEST 1: All Instruction Fields Zero -> Static Outputs
         // ------------------------------------------------
         i_inst = 32'h00000000; #10;
@@ -66,17 +66,17 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h002081B3; #10;
         
-        if (o_opcode !== 7'b0110011) begin
+        if (o_opcode !== `OP_ALU) begin
             $display("FAIL: R-Type Opcode Mismatch! Got %b", o_opcode);
             error_count++;
         end
-        if (o_reg_write !== 1'b1 || o_alu_src_a !== 1'b0 || o_alu_src_b !== 1'b0 || o_mem_write !== 1'b0 || o_result_mux !== 2'b00 || o_branch !== 1'b0) begin
-            $display("FAIL: R-Type Control Path Mismatch!");
+        // Expected: src_a=1 (REG_A), src_b=1 (REG_B)
+        if (o_reg_write !== 1'b1 || o_alu_src_a !== 1'b1 || o_alu_src_b !== 1'b1 || o_mem_write !== 1'b0 || o_result_mux !== 2'b00 || o_branch !== 1'b0) begin
+            $display("FAIL: R-Type Control Path Mismatch! src_a=%b, src_b=%b", o_alu_src_a, o_alu_src_b);
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP (Should be 4'b0000 zero-extended to 6 bits -> 6'b000000)
-        if (o_alu_op !== 6'b000000) begin
-            $display("FAIL: R-Type ADD alu_op Mismatch! Expected 6'b000000, Got %b", o_alu_op);
+        if (o_alu_op !== `OP_ALU_ADD) begin
+            $display("FAIL: R-Type ADD alu_op Mismatch!");
             error_count++;
         end
 
@@ -85,15 +85,15 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h00822283; #10;
 
-        if (o_opcode !== 7'b0000011) begin
+        if (o_opcode !== `OP_LOAD) begin
             $display("FAIL: Load Opcode Mismatch! Got %b", o_opcode);
             error_count++;
         end
-        if (o_reg_write !== 1'b1 || o_alu_src_b !== 1'b1 || o_result_mux !== 2'b10) begin
+        // Expected: src_a=1 (REG_A), src_b=0 (IMM)
+        if (o_reg_write !== 1'b1 || o_alu_src_a !== 1'b1 || o_alu_src_b !== 1'b0 || o_result_mux !== 2'b10) begin
             $display("FAIL: Load Control Path Mismatch!");
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP (Loads use address additions)
         if (o_alu_op !== `OP_ALU_ADD) begin
             $display("FAIL: Load Address Calculation alu_op Mismatch!");
             error_count++;
@@ -104,15 +104,15 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h0063A623; #10;
 
-        if (o_opcode !== 7'b0100011) begin
+        if (o_opcode !== `OP_STORE) begin
             $display("FAIL: Store Opcode Mismatch!");
             error_count++;
         end
-        if (o_reg_write !== 1'b0 || o_mem_write !== 1'b1 || o_alu_src_b !== 1'b1) begin
+        // Expected: src_a=1 (REG_A), src_b=0 (IMM)
+        if (o_reg_write !== 1'b0 || o_mem_write !== 1'b1 || o_alu_src_a !== 1'b1 || o_alu_src_b !== 1'b0) begin
             $display("FAIL: Store Control Path Mismatch!");
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP
         if (o_alu_op !== `OP_ALU_ADD) begin
             $display("FAIL: Store Address Calculation alu_op Mismatch!");
             error_count++;
@@ -123,7 +123,8 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h00940063; #10;
 
-        if (o_branch !== 1'b1 || o_reg_write !== 1'b0 || o_mem_write !== 1'b0) begin
+        // Expected: branch=1, src_a=0 (PC), src_b=0 (IMM)
+        if (o_branch !== 1'b1 || o_reg_write !== 1'b0 || o_mem_write !== 1'b0 || o_alu_src_a !== 1'b0 || o_alu_src_b !== 1'b0) begin
             $display("FAIL: Branch Control Assertions Mismatch!");
             error_count++;
         end
@@ -133,13 +134,13 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h00F58513; #10;
 
-        if (o_reg_write !== 1'b1 || o_alu_src_b !== 1'b1 || o_result_mux !== 2'b00) begin
+        // Expected: src_a=1 (REG_A), src_b=0 (IMM)
+        if (o_reg_write !== 1'b1 || o_alu_src_a !== 1'b1 || o_alu_src_b !== 1'b0 || o_result_mux !== 2'b00) begin
             $display("FAIL: ADDI Control Path Configuration Mismatch!");
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP (Funct3 is 3'b000 -> 6'b000000)
-        if (o_alu_op !== 6'b000000) begin
-            $display("FAIL: ADDI alu_op Mismatch! Got %b", o_alu_op);
+        if (o_alu_op !== `OP_ALU_ADD) begin
+            $display("FAIL: ADDI alu_op Mismatch!");
             error_count++;
         end
 
@@ -148,11 +149,11 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h12345617; #10;
 
-        if (o_reg_write !== 1'b1 || o_alu_src_a !== 1'b1 || o_alu_src_b !== 1'b1) begin
+        // Expected: src_a=0 (PC), src_b=0 (IMM)
+        if (o_reg_write !== 1'b1 || o_alu_src_a !== 1'b0 || o_alu_src_b !== 1'b0) begin
             $display("FAIL: AUIPC Control Path Configuration Mismatch!");
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP
         if (o_alu_op !== `OP_ALU_ADD) begin
             $display("FAIL: AUIPC Target Calculation alu_op Mismatch!");
             error_count++;
@@ -163,11 +164,11 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h004000EF; #10;
 
-        if (o_reg_write !== 1'b1 || o_result_mux !== 2'b01) begin
+        // Expected: branch=1, src_a=0 (PC), src_b=0 (IMM), mux=01 (PC+4)
+        if (o_branch !== 1'b1 || o_reg_write !== 1'b1 || o_alu_src_a !== 1'b0 || o_alu_src_b !== 1'b0 || o_result_mux !== 2'b01) begin
             $display("FAIL: JAL Control Path Configuration Mismatch!");
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP
         if (o_alu_op !== `OP_ALU_ADD) begin
             $display("FAIL: JAL Target Calculation alu_op Mismatch!");
             error_count++;
@@ -178,27 +179,24 @@ module decoder_tb;
         // ------------------------------------------------
         i_inst = 32'h00008067; #10;
 
-        if (o_reg_write !== 1'b1 || o_alu_src_b !== 1'b1 || o_result_mux !== 2'b01) begin
+        // Expected: branch=1, src_a=1 (REG_A), src_b=0 (IMM), mux=01 (PC+4)
+        if (o_branch !== 1'b1 || o_reg_write !== 1'b1 || o_alu_src_a !== 1'b1 || o_alu_src_b !== 1'b0 || o_result_mux !== 2'b01) begin
             $display("FAIL: JALR Control Path Configuration Mismatch!");
             error_count++;
         end
-        // ADDED VERIFICATION FOR ALU_OP
         if (o_alu_op !== `OP_ALU_ADD) begin
             $display("FAIL: JALR Target Calculation alu_op Mismatch!");
             error_count++;
         end
 
         // ------------------------------------------------
-        // NEW TEST 10: Immediate Shift Bit-30 Differentiation Check (SRAI)
-        // Fields: imm=010000000100 (Bit 30 is 1), rs1=00010, funct3=101, rd=00011, opcode=0010011
+        // TEST 10: Immediate Shift Bit-30 Differentiation Check (SRAI)
         // Hex: 40415193 (srai x3, x2, 4)
         // ------------------------------------------------
         i_inst = 32'h40415193; #10;
 
-        // Verify that bit 30 successfully passes through into the alu_op bus
-        // {inst[30], funct3} = {1'b1, 3'b101} = 4'b1101 (Implicitly zero-extended to 6'b001101)
-        if (o_alu_op !== 6'b001101) begin
-            $display("FAIL: Immediate Shift SRAI bit-30 extraction failed! Got %b", o_alu_op);
+        if (o_alu_op !== `OP_ALU_SRA) begin
+            $display("FAIL: Immediate Shift SRAI bit-30 extraction failed!");
             error_count++;
         end
 

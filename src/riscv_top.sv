@@ -67,8 +67,13 @@ module riscv_top (
     // Sequential Next-PC Adder 
     assign pc_plus_4 = pc + 32'd4;
 
-    // Selects ALU Result on branch/jump take, else PC+4
-    assign pc_next = branch_take ? alu_result : pc_plus_4;
+    // Selects ALU Result on branch/jump take, else PC+4. JALR's target is
+    // rs1+imm, which the ISA requires clearing bit 0 of (BEQ/BNE/etc and
+    // JAL targets are inherently even already from their own immediate
+    // encodings, so only JALR needs the explicit mask here).
+    assign pc_next = branch_take
+        ? ((opcode == `OP_JALR) ? {alu_result[31:1], 1'b0} : alu_result)
+        : pc_plus_4;
 
     // ==============================================================================
     // CORE HARDWARE MODULE INSTANTIATIONS
@@ -77,7 +82,7 @@ module riscv_top (
     // Instruction Memory Internal ROM Block
     instruction_memory u_instruction_memory (
         .clk(i_clk),
-        .addr(pc[9:0]),
+        .addr(pc[13:0]),
         .inst(inst)
     );
 
@@ -144,7 +149,7 @@ module riscv_top (
         .i_clk(i_clk),
         .i_we(o_mem_write),
         .i_data(reg_rd_data2),
-        .i_addr(alu_result[9:0]),
+        .i_addr(alu_result[13:0]),
         .o_data(mem_o_data)
     );
 
