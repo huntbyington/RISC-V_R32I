@@ -1,3 +1,0 @@
-VCD info: dumpfile sim/out/dut_tb_waves.vcd opened for output.
-HALT: tohost = 0x1 after 3254 cycles
-/work/tb/dut_tb.sv:105: $finish called at 65150000 (1ps)
