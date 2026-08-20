@@ -45,13 +45,19 @@ write_tohost:                                                            \
         sw x1, 0(x2);                                                    \
         j write_tohost;
 
+// .align N means align to 2^N bytes on RISC-V, so `.align 4` here padded to
+// a 16-byte boundary instead of a 4-byte word boundary, and end_signature
+// carried an alignment directive the reference model's own model_test.h
+// doesn't -- together adding extra trailing words RISCOF's signature
+// comparison never expects. Matched to the reference model's own alignment
+// (word-aligned begin, unaligned end) so both sides agree on region size.
 #define RVMODEL_DATA_BEGIN                                              \
         RVMODEL_DATA_SECTION                                            \
-        .align 4;                                                       \
+        .align 2;                                                       \
         .global begin_signature; begin_signature:
 
 #define RVMODEL_DATA_END                                                \
-        .align 4; .global end_signature; end_signature:
+        .global end_signature; end_signature:
 
 // ---------------------------------------------------------------------------
 // No I/O, no interrupts, no floating point on this core -- all no-ops.

@@ -58,9 +58,10 @@ cd riscof-env
 make test
 ```
 
-This builds the Docker image (expect 30-60 min the first time -- it builds
-the RISC-V GCC toolchain and the Sail reference model from source) and then
-runs the full `rv32i_m/I` suite. Results, logs, and the HTML report land in
+This builds the Docker image and then runs the full `rv32i_m/I` suite. The
+RISC-V GCC toolchain is a prebuilt binary download (fast), but the Sail
+reference model is still built from source (via opam/OCaml), so expect the
+first build to take a while regardless -- mostly on that step. Results, logs, and the HTML report land in
 `riscof-env/riscof_work/` on your host (bind-mounted, so nothing is lost
 when the container exits). Open `riscof_work/report.html` for the pass/fail
 breakdown.

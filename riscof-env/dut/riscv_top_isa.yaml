@@ -7,15 +7,8 @@ hart0:
 
   # No privileged extensions/CSRs are implemented -- machine mode "exists"
   # only in the trivial sense that there is nothing else. Traps, CSR access,
-  # and exceptions are not implemented in the DUT.
-  M:
-    version: '2.0'
-    accept: true
-  Zicsr:
-    version: '2.0'
-    accept: false
-  Zifencei:
-    version: '2.0'
-    accept: false
-
+  # and exceptions are not implemented in the DUT. M/Zicsr/Zifencei are
+  # deliberately absent from ISA above, so their per-extension config blocks
+  # aren't valid schema fields here (riscv-config only allows config for
+  # extensions actually listed in the ISA string).
   hw_data_misaligned_support: false
