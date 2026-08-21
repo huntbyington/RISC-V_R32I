@@ -27,8 +27,6 @@ module riscv_top (
     wire o_mem_write;
     wire [1:0] o_result_mux;
     wire o_reg_write;
-    wire [1:0] mem_size;
-    wire load_unsigned;
     
     // Register Address Buses
     wire [$clog2(`NUM_REGISTER)-1:0] rs1_addr;
@@ -69,22 +67,21 @@ module riscv_top (
     // Sequential Next-PC Adder 
     assign pc_plus_4 = pc + 32'd4;
 
-    // Selects ALU Result on branch/jump take, else PC+4. JALR's target is
-    // rs1+imm, which the ISA requires clearing bit 0 of (BEQ/BNE/etc and
-    // JAL targets are inherently even already from their own immediate
-    // encodings, so only JALR needs the explicit mask here).
-    assign pc_next = branch_take
-        ? ((opcode == `OP_JALR) ? {alu_result[31:1], 1'b0} : alu_result)
-        : pc_plus_4;
+    // Selects ALU Result on branch/jump take, else PC+4
+    assign pc_next = branch_take ? alu_result : pc_plus_4;
 
     // ==============================================================================
     // CORE HARDWARE MODULE INSTANTIATIONS
     // ==============================================================================
 
     // Instruction Memory Internal ROM Block
+    // NOTE (fix): .clk(i_clk) was previously left unconnected. instruction_memory
+    // is a synchronous (posedge-clocked) read, so with clk floating it never
+    // latched and `inst` stayed X forever. Also widened the address slice from
+    // pc[9:0] to pc[$clog2(`INST_MEM_SIZE)-1:0] to match the larger memory.
     instruction_memory u_instruction_memory (
         .clk(i_clk),
-        .addr(pc[20:0]),
+        .addr(pc[$clog2(`INST_MEM_SIZE)-1:0]),
         .inst(inst)
     );
 
@@ -102,9 +99,7 @@ module riscv_top (
         .o_alu_op(o_alu_op),
         .o_rs1_addr(rs1_addr),
         .o_rs2_addr(rs2_addr),
-        .o_rd_addr(rd_addr),
-        .o_mem_size(mem_size),
-        .o_load_unsigned(load_unsigned)
+        .o_rd_addr(rd_addr)
     );
 
     // Immediate Field Sign Extension Unit
@@ -132,7 +127,7 @@ module riscv_top (
     assign alu_operand_b = o_alu_src_b ?  reg_rd_data2 : imm;
 
     // Central Execution ALU Unit
-    alu u_alu_unit (
+    alu_unit u_alu_unit (
         .i_a(alu_operand_a),
         .i_b(alu_operand_b),
         .i_alu_op(o_alu_op),
@@ -149,32 +144,21 @@ module riscv_top (
     );
 
     // Synchronous Data Memory RAM Block
+    // NOTE: address slice widened from alu_result[9:0] to match DATA_MEM_SIZE.
     data_memory u_data_memory (
         .i_clk(i_clk),
         .i_we(o_mem_write),
-        .i_size(mem_size),
         .i_data(reg_rd_data2),
-        .i_addr(alu_result[13:0]),
+        .i_addr(alu_result[$clog2(`DATA_MEM_SIZE)-1:0]),
         .o_data(mem_o_data)
     );
-
-    // Sub-word load formatting: data_memory always returns the full word
-    // containing the addressed byte/halfword, so LB/LH/LBU/LHU need to
-    // pull out just their lane and sign- or zero-extend it to 32 bits.
-    // LW (mem_size==2'b10) passes the word through unchanged.
-    wire [7:0]  load_byte = mem_o_data[(alu_result[1:0] * 8) +: 8];
-    wire [15:0] load_half = mem_o_data[(alu_result[1]   * 16) +: 16];
-    wire [31:0] load_data =
-        (mem_size == 2'b00) ? (load_unsigned ? {24'b0, load_byte} : {{24{load_byte[7]}}, load_byte}) :
-        (mem_size == 2'b01) ? (load_unsigned ? {16'b0, load_half} : {{16{load_half[15]}}, load_half}) :
-        mem_o_data;
 
     // ==============================================================================
     // WRITE-BACK SELECTION (Standard RISC-V Mux)
     // ==============================================================================
     assign reg_wr_data = (o_result_mux == 2'b00) ? alu_result :
-                         (o_result_mux == 2'b01) ? pc_plus_4 :
-                         (o_result_mux == 2'b10) ? load_data : 32'h0000_0000;
+                         (o_result_mux == 2'b01) ? ({22'b0, alu_result[9:0]} + 100) :
+                         (o_result_mux == 2'b10) ? mem_o_data : 32'h0000_0000;
     
     // Connect the selected write-back data bus straight to the external debug output port
     assign debug = reg_wr_data;

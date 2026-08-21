@@ -6,36 +6,58 @@ SRC_DIR = src
 SIM_DIR = sim
 OUT_DIR = sim/out
 
+# ---------------------------------------------------------
+# Cross-Platform Settings
+# ---------------------------------------------------------
+ifeq ($(OS),Windows_NT)
+	# Windows Commands
+	MKDIR = if not exist "$(subst /,\,$(OUT_DIR))" mkdir "$(subst /,\,$(OUT_DIR))"
+	RMDIR = if exist "$(subst /,\,$(OUT_DIR))" rmdir /s /q "$(subst /,\,$(OUT_DIR))"
+	RMFILES = del /q *.vvp *_sim *_sim.exe *.vcd 2>nul || exit 0
+	EXT = .exe
+else
+	# Linux / macOS Commands
+	MKDIR = mkdir -p $(OUT_DIR)
+	RMDIR = rm -rf $(OUT_DIR)
+	RMFILES = rm -f *.vvp *_sim *_sim.exe *.vcd
+	EXT = .out
+endif
+
+# ---------------------------------------------------------
 # Module Definitions
+# ---------------------------------------------------------
 ALU_SRC = $(SRC_DIR)/alu.sv
 ALU_TB  = $(SIM_DIR)/alu_tb.sv
-ALU_OUT = $(OUT_DIR)/alu_sim.exe
+ALU_OUT = $(OUT_DIR)/alu_sim$(EXT)
 
 IMAGE_SRC = $(SRC_DIR)/sign_extension.sv
 IMAGE_TB  = $(SIM_DIR)/sign_extension_tb.sv
-IMAGE_OUT = $(OUT_DIR)/sign_ext_sim.exe
+IMAGE_OUT = $(OUT_DIR)/sign_ext_sim$(EXT)
 
 REG_SRC = $(SRC_DIR)/reg_file.sv
 REG_TB  = $(SIM_DIR)/reg_file_tb.sv
-REG_OUT = $(OUT_DIR)/reg_file_sim.exe
+REG_OUT = $(OUT_DIR)/reg_file_sim$(EXT)
 
 DM_SRC  = $(SRC_DIR)/data_memory.sv
 DM_TB   = $(SIM_DIR)/data_memory_tb.sv
-DM_OUT  = $(OUT_DIR)/data_mem_sim.exe
+DM_OUT  = $(OUT_DIR)/data_mem_sim$(EXT)
 
 DECODER_SRC = $(SRC_DIR)/decoder.sv
 DECODER_TB  = $(SIM_DIR)/decoder_tb.sv
-DECODER_OUT = $(OUT_DIR)/decoder_sim.exe
+DECODER_OUT = $(OUT_DIR)/decoder_sim$(EXT)
 
 BRANCH_SRC = $(SRC_DIR)/branch_unit.sv
 BRANCH_TB  = $(SIM_DIR)/branch_unit_tb.sv
-BRANCH_OUT = $(OUT_DIR)/branch_unit_sim.exe
+BRANCH_OUT = $(OUT_DIR)/branch_unit_sim$(EXT)
 
+# ---------------------------------------------------------
+# Targets
+# ---------------------------------------------------------
 all: alu image reg dm decoder branch
 
 # Dynamic cross-platform folder creation
 $(OUT_DIR):
-	@mkdir -p $(OUT_DIR) 2>/dev/null || mkdir "$(OUT_DIR)"
+	@$(MKDIR)
 
 alu: $(ALU_SRC) $(ALU_TB) | $(OUT_DIR)
 	@echo "Compiling and Running ALU Testbench..."
@@ -69,6 +91,7 @@ branch: $(BRANCH_SRC) $(BRANCH_TB) | $(OUT_DIR)
 
 clean:
 	@echo "Cleaning up project directory..."
-	@rm -rf $(OUT_DIR) *.vvp *_sim *_sim.exe *.vcd 2>/dev/null || (if exist "sim\out" rmdir /s /q "sim\out")
+	@$(RMDIR)
+	@$(RMFILES)
 
 .PHONY: all alu image reg dm decoder branch clean

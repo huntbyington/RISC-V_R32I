@@ -1,0 +1,8 @@
+mtime:
+  implemented: false
+mtimecmp:
+  implemented: false
+nmi:
+  label: nmi_vec
+reset:
+  label: reset_vec

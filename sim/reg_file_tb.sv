@@ -50,7 +50,7 @@ module register_file_tb;
         // ------------------------------------------------
         // TEST 1: System Reset Validation
         // ------------------------------------------------
-        rst_n = 0;
+        rst_n = 1;
         i_reg_write = 0;
         i_rs1_addr = 5'd5;
         i_rs2_addr = 5'd10;
@@ -58,7 +58,7 @@ module register_file_tb;
         i_rd_data = 32'h0;
         #25; // Hold reset across a clock edge
         
-        rst_n = 1; // Release reset
+        rst_n = 0; // Release reset
         #5;
         
         // Verify registers read back 0 after a reset

@@ -22,7 +22,7 @@ module register_file (
     assign o_rs2 = (i_rs2_addr == 0) ? 32'h0 : registers[i_rs2_addr];
 
     always @(posedge i_clk) begin
-        if (!i_rst) begin
+        if (i_rst) begin
             // Reset all registers to zero
             integer i;
             for (i = 0; i < `NUM_REGISTER; i = i + 1) begin

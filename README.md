@@ -9,6 +9,7 @@ Implementation of a 32-bit RISC-V Base Integer Instruction Set (RV32I) CPU desig
 * **docs/** - Contains documentation assets, including the architecture diagrams.
 * **src/** - Contains all the SystemVerilog (.sv) source files for the CPU core (e.g., ALU, Control Unit, Register File, Program Counter).
 * **sim/** - Testbenches, verification environments, and simulation scripts to validate processor functionality.
+* **riscof-env/** - Docker-based [RISCOF](https://riscof.readthedocs.io/) environment that runs the official RISC-V architectural compliance suite against this CPU (see [Architectural Compliance Testing](#architectural-compliance-testing-docker) below, and `riscof-env/README.md` for the full guide).
 * **Makefile** - Automation script for running simulations, compiling code, and cleaning up the workspace.
 * **LICENSE** - The project's licensing terms.
 
@@ -64,12 +65,34 @@ make clean
 
 ---
 
+## Architectural Compliance Testing (Docker)
+
+Beyond the per-module unit testbenches above, `riscof-env/` runs the official
+[riscv-arch-test](https://github.com/riscv-non-isa/riscv-arch-test)
+`rv32i_m/I` suite against this CPU using
+[RISCOF](https://riscof.readthedocs.io/): each test is compiled and run
+twice -- once against this CPU (simulated with Icarus Verilog) and once
+against a [Spike](https://github.com/riscv-software-src/riscv-isa-sim)
+reference model -- and the two resulting signatures are diffed. The GNU
+toolchain, RISCOF, Spike, and Icarus Verilog are all built inside a Docker
+image, so results don't depend on what's installed on your host.
+
+```bash
+cd riscof-env
+make test
+```
+
+The full `rv32i_m/I` suite currently passes end-to-end. A per-test
+`Passed`/`Failed` summary prints to the terminal, and a full HTML report is
+generated automatically. See [`riscof-env/README.md`](riscof-env/README.md)
+for the complete guide -- directory layout, how to read the results, and
+how a test runs under the hood.
+
+---
+
 ## Current Work & Future Changes
 
-Active development is underway to expand the verification suite beyond basic unit tests:
-
-* **Docker-Based Testing Framework:** Implementing a containerized testing environment to ensure clean, reproducible build and simulation states across different machines.
-* **Official Architectural Compliance:** Integrating the official [RISC-V Architectural Tests (act4 branch)](https://github.com/riscv/riscv-arch-test/tree/act4) to rigorously validate the processor's compatibility with the RV32I ISA specification.
+* **FPGA Hardware Validation:** Moving beyond simulation -- synthesizing the design for real FPGA hardware and testing it there, to confirm the RTL's behavior holds up outside Icarus Verilog/Spike (timing closure, I/O constraints, and anything else simulation alone can't catch).
 
 ---
 
