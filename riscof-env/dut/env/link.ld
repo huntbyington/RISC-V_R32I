@@ -2,8 +2,8 @@
  * link.ld for the "riscv_top" DUT (huntbyington/RISC-V_R32I)
  *
  * riscv_top is a Harvard architecture: instruction_memory and data_memory
- * are two SEPARATE 16KB arrays, each independently indexed by the low
- * address bits ($clog2(INST_MEM_SIZE)-1:0 / $clog2(DATA_MEM_SIZE)-1:0).
+ * are two SEPARATE arrays (2MB / 16KB), each independently indexed by the
+ * low address bits ($clog2(INST_MEM_SIZE)-1:0 / $clog2(DATA_MEM_SIZE)-1:0).
  * Both are modeled here as MEMORY regions based at 0x0 -- this is fine for
  * ld even though their address ranges numerically overlap, since code and
  * data live in genuinely separate physical arrays in simulation.
@@ -22,7 +22,7 @@ ENTRY(rvtest_entry_point)
 
 MEMORY
 {
-    IMEM (rx)  : ORIGIN = 0x00000000, LENGTH = 16K
+    IMEM (rx)  : ORIGIN = 0x00000000, LENGTH = 2M
     DMEM (rw)  : ORIGIN = 0x00000000, LENGTH = 16K
 }
 

@@ -43,14 +43,16 @@ module decoder (
 
         if (o_opcode == `OP_BRANCH) begin
             case (funct3) // Used the wire here
-                3'b000:  o_branch_op = 3'b000; // BEQ
-                3'b001:  o_branch_op = 3'b001; // BNE
-                3'b100:  o_branch_op = 3'b010; // BLT
-                3'b101:  o_branch_op = 3'b011; // BGE
-                3'b110:  o_branch_op = 3'b100; // BLTU
-                3'b111:  o_branch_op = 3'b101; // BGEU
-                default: o_branch_op = 3'b000; // Default to BEQ for safety
+                3'b000:  o_branch_op = `BRANCH_BEQ;
+                3'b001:  o_branch_op = `BRANCH_BNE;
+                3'b100:  o_branch_op = `BRANCH_BLT;
+                3'b101:  o_branch_op = `BRANCH_BGE;
+                3'b110:  o_branch_op = `BRANCH_BLTU;
+                3'b111:  o_branch_op = `BRANCH_BGEU;
+                default: o_branch_op = `BRANCH_BEQ; // Default to BEQ for safety
             endcase
+        end else if (o_opcode == `OP_JAL || o_opcode == `OP_JALR) begin
+            o_branch_op = `BRANCH_JAL_JALR;
         end
     end
 

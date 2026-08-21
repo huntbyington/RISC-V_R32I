@@ -82,7 +82,7 @@ module riscv_top (
     // Instruction Memory Internal ROM Block
     instruction_memory u_instruction_memory (
         .clk(i_clk),
-        .addr(pc[13:0]),
+        .addr(pc[20:0]),
         .inst(inst)
     );
 
@@ -157,7 +157,7 @@ module riscv_top (
     // WRITE-BACK SELECTION (Standard RISC-V Mux)
     // ==============================================================================
     assign reg_wr_data = (o_result_mux == 2'b00) ? alu_result :
-                         (o_result_mux == 2'b01) ? ({22'b0, alu_result[9:0]} + 100) :
+                         (o_result_mux == 2'b01) ? pc_plus_4 :
                          (o_result_mux == 2'b10) ? mem_o_data : 32'h0000_0000;
     
     // Connect the selected write-back data bus straight to the external debug output port
