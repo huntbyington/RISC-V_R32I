@@ -27,6 +27,8 @@ module riscv_top (
     wire o_mem_write;
     wire [1:0] o_result_mux;
     wire o_reg_write;
+    wire [1:0] mem_size;
+    wire load_unsigned;
     
     // Register Address Buses
     wire [$clog2(`NUM_REGISTER)-1:0] rs1_addr;
@@ -100,7 +102,9 @@ module riscv_top (
         .o_alu_op(o_alu_op),
         .o_rs1_addr(rs1_addr),
         .o_rs2_addr(rs2_addr),
-        .o_rd_addr(rd_addr)
+        .o_rd_addr(rd_addr),
+        .o_mem_size(mem_size),
+        .o_load_unsigned(load_unsigned)
     );
 
     // Immediate Field Sign Extension Unit
@@ -148,17 +152,29 @@ module riscv_top (
     data_memory u_data_memory (
         .i_clk(i_clk),
         .i_we(o_mem_write),
+        .i_size(mem_size),
         .i_data(reg_rd_data2),
         .i_addr(alu_result[13:0]),
         .o_data(mem_o_data)
     );
+
+    // Sub-word load formatting: data_memory always returns the full word
+    // containing the addressed byte/halfword, so LB/LH/LBU/LHU need to
+    // pull out just their lane and sign- or zero-extend it to 32 bits.
+    // LW (mem_size==2'b10) passes the word through unchanged.
+    wire [7:0]  load_byte = mem_o_data[(alu_result[1:0] * 8) +: 8];
+    wire [15:0] load_half = mem_o_data[(alu_result[1]   * 16) +: 16];
+    wire [31:0] load_data =
+        (mem_size == 2'b00) ? (load_unsigned ? {24'b0, load_byte} : {{24{load_byte[7]}}, load_byte}) :
+        (mem_size == 2'b01) ? (load_unsigned ? {16'b0, load_half} : {{16{load_half[15]}}, load_half}) :
+        mem_o_data;
 
     // ==============================================================================
     // WRITE-BACK SELECTION (Standard RISC-V Mux)
     // ==============================================================================
     assign reg_wr_data = (o_result_mux == 2'b00) ? alu_result :
                          (o_result_mux == 2'b01) ? pc_plus_4 :
-                         (o_result_mux == 2'b10) ? mem_o_data : 32'h0000_0000;
+                         (o_result_mux == 2'b10) ? load_data : 32'h0000_0000;
     
     // Connect the selected write-back data bus straight to the external debug output port
     assign debug = reg_wr_data;

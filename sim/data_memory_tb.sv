@@ -5,6 +5,7 @@ module data_memory_tb;
 
     logic                    i_clk;
     logic                    i_we;
+    logic [1:0]              i_size;
     logic [`DATA_WIDTH-1:0]   i_data;
     logic [9:0]              i_addr; // $clog2(1024) = 10 bits
     logic [`DATA_WIDTH-1:0]   o_data;
@@ -15,6 +16,7 @@ module data_memory_tb;
     data_memory DUT (
         .i_clk(i_clk),
         .i_we(i_we),
+        .i_size(i_size),
         .i_data(i_data),
         .i_addr(i_addr),
         .o_data(o_data)
@@ -38,6 +40,7 @@ module data_memory_tb;
 
         // Initialize ports
         i_we   = 0;
+        i_size = 2'b10; // this testbench only exercises whole-word access
         i_data = 32'h0;
         i_addr = 10'h0;
         #25; // Let clock initialize and pass the first positive edge

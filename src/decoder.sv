@@ -15,7 +15,9 @@ module decoder (
     output reg [5:0] o_alu_op,
     output wire [$clog2(`NUM_REGISTER) - 1: 0] o_rs1_addr,
     output wire [$clog2(`NUM_REGISTER) - 1: 0] o_rs2_addr,
-    output wire [$clog2(`NUM_REGISTER) - 1: 0] o_rd_addr    
+    output wire [$clog2(`NUM_REGISTER) - 1: 0] o_rd_addr,
+    output wire [1:0] o_mem_size,   // 2'b00=byte, 2'b01=halfword, 2'b10=word (LOAD/STORE only)
+    output wire       o_load_unsigned // 1 = zero-extend (LBU/LHU), 0 = sign-extend (LB/LH/LW)
 );
 
     assign o_opcode = i_inst[6:0];
@@ -57,6 +59,8 @@ module decoder (
     end
 
     assign o_mem_write = (o_opcode == `OP_STORE) ? 1'b1 : 1'b0;
+    assign o_mem_size = (o_opcode == `OP_LOAD || o_opcode == `OP_STORE) ? funct3[1:0] : 2'b10;
+    assign o_load_unsigned = funct3[2];
     assign o_alu_src_a = (o_opcode == `OP_BRANCH || o_opcode == `OP_AUIPC || o_opcode == `OP_JAL) ? 1'b0 : 1'b1;
     assign o_alu_src_b = (o_opcode == `OP_ALU) ? 1'b1 : 1'b0;
     assign o_reg_write = (o_opcode == `OP_ALU   || 
